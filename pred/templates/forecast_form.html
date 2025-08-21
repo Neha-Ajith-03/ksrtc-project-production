@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demand Forecast Tool</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary-color: #d9693a;
+            --primary-light: rgba(217, 105, 58, 0.1);
+            --primary-dark: #c55a2e;
+            --secondary-color: #4169E1;
+            --text-light: #ffffff;
+            --text-color: #333;
+            --text-secondary: #666;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --hover-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://source.unsplash.com/random/1600x900/?bus,transport');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--text-light);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-color);
+            transform: translateX(-50%);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            margin-top: 15px;
+        }
+
+        .card-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 700px;
+            padding: 40px;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .card-container:hover {
+            box-shadow: var(--hover-shadow);
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 25px;
+            transition: var(--transition);
+        }
+
+        .back-link i {
+            margin-right: 8px;
+        }
+
+        .back-link:hover {
+            color: var(--primary-dark);
+            transform: translateX(-5px);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+
+        .section-title i {
+            margin-right: 12px;
+            font-size: 1.6rem;
+            background-color: var(--primary-light);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .field-label {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .field-label i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: #f9f9f9;
+        }
+
+        .field-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(217, 105, 58, 0.15);
+            background-color: #fff;
+        }
+
+        .field-help {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            margin-left: 24px;
+        }
+
+        .submit-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(217, 105, 58, 0.3);
+        }
+
+        .submit-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(217, 105, 58, 0.4);
+        }
+
+        .submit-button:active {
+            transform: translateY(1px);
+        }
+
+        .submit-button i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* Select2 customization */
+        .select2-container--default .select2-selection--single {
+            height: auto;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            background-color: #f9f9f9;
+        }
+
+        .select2-container--default .select2-selection--single:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(217, 105, 58, 0.15);
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding: 0;
+            line-height: 1.5;
+            color: var(--text-color);
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 100%;
+            right: 12px;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--primary-color);
+        }
+
+        .select2-dropdown {
+            border-color: #ddd;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-section {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .form-section-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-section-title i {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 767px) {
+            .card-container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+            
+            .submit-button {
+                padding: 14px;
+            }
+        }
+    </style>
+    <!-- Include Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Include jQuery (required by Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Include Select2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Demand Forecast Tool</h1>
+        <!-- <p class="subtitle">Generate accurate passenger demand forecasts to optimize bus schedules and capacity planning</p> -->
+    </header>
+
+    <div class="card-container">
+        <a href="{% url 'main_home' %}" class="back-link">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+        
+        <div class="section-title">
+            <i class="bi bi-graph-up-arrow"></i> Generate Passenger Demand Forecast
+        </div>
+        
+        <form method="POST" action="{% url 'demand_forecast' %}">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="bi bi-pin-map-fill"></i> Journey Information
+                </div>
+                
+                <div class="form-group">
+                    <label class="field-label" for="to_stop_name">
+                        <i class="bi bi-geo-alt"></i> Destination Stop:
+                    </label>
+                    <select id="to_stop_name" name="to_stop_name" class="field-input" required>
+                        <option value="" disabled selected>Select a destination stop</option>
+                        {% for stop in stops %}
+                            <option value="{{ stop }}">{{ stop }}</option>
+                        {% endfor %}
+                    </select>
+                   <!--  <p class="field-help">Choose the final destination stop for passenger demand forecasting</p> -->
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="bi bi-calendar-check"></i> Date Selection
+                </div>
+                
+                <div class="form-group">
+                    <label class="field-label" for="date">
+                        <i class="bi bi-calendar"></i> Travel Date:
+                    </label>
+                    <input type="date" id="date" name="date" class="field-input" min="2024-06-01" max="2024-10-31" required>
+                  <!--   <p class="field-help">Choose a date between June 2024 and October 2024 for the forecast</p>   -->
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-button">
+                <i class="bi bi-lightning-charge"></i> Generate Forecast
+            </button>
+        </form>
+    </div>
+
+<script>
+    // Initialize Select2 on the dropdown
+    $(document).ready(function() {
+        $('#to_stop_name').select2({
+            placeholder: "Select a destination stop",
+            width: '100%',
+            theme: "classic"
+        });
+        
+        // Set today's date as default
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0];
+        document.getElementById('date').value = formattedDate;
+        
+        // Add animation to form sections
+        $('.form-section').each(function(index) {
+            $(this).css({
+                'opacity': 0,
+                'transform': 'translateY(20px)'
+            });
+            
+            setTimeout(() => {
+                $(this).css({
+                    'transition': 'all 0.5s ease',
+                    'opacity': 1,
+                    'transform': 'translateY(0)'
+                });
+            }, 300 + (index * 150));
+        });
+    });
+</script>
+</body>
+</html>

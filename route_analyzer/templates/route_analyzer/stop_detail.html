@@ -1,0 +1,71 @@
+{% extends 'route_analyzer/base.html' %}
+
+{% block title %}{{ stop_name }} - Stop Details{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>{{ stop_name }}</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'route_analyzer:index' %}">Route Analyzer</a></li>
+                <li class="breadcrumb-item active">{{ stop_name }}</li>
+            </ol>
+        </nav>
+        <p class="text-muted">Routes passing through this stop</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Routes</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Route</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Position</th>
+                                <th>Total Stops</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for route in route_details %}
+                            <tr>
+                                <td>{{ route.route_no }}</td>
+                                <td>{{ route.source }}</td>
+                                <td>{{ route.destination }}</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ route.percentage }}%;" 
+                                            aria-valuenow="{{ route.position }}" aria-valuemin="0" aria-valuemax="{{ route.stops_count }}">
+                                            {{ route.position }}/{{ route.stops_count }}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ route.stops_count }}</td>
+                                <td>
+                                    <a href="{% url 'route_analyzer:route_detail' route_no=route.route_no %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-chart-bar"></i> Analyze
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No routes found for this stop</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

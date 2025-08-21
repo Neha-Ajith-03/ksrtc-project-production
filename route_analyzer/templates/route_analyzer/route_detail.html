@@ -1,0 +1,233 @@
+{% extends 'route_analyzer/base.html' %}
+
+{% block title %}Route {{ route_no }} Details{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>Route {{ route_no }} Analysis</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'route_analyzer:index' %}">Route Analyzer</a></li>
+                <li class="breadcrumb-item active">Route {{ route_no }}</li>
+            </ol>
+        </nav>
+        <p class="text-muted">{{ source }} to {{ destination }}</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Schedule Gantt Chart</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">This chart shows all schedules for Route {{ route_no }} in a 24-hour window. Overlapping schedules are highlighted in red.</p>
+
+                <div class="gantt-container">
+                    <div class="gantt-chart" id="ganttChart">
+                        <div class="time-axis" id="timeAxis"></div>
+                        <div id="ganttRows"></div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" id="conflictAlert" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i> <span id="conflictCount">0</span> scheduling conflicts detected. Conflicts are highlighted in red.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Route Stops</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for stop in stops %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ stop.stop_name }}</h6>
+                            <small>Stop {{ stop.order_sequence }}</small>
+                        </div>
+                        {% if stop.distance_from_source %}
+                        <small class="text-muted">{{ stop.distance_from_source }} km from source</small>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item">No stops found for this route</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Schedules</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Schedule</th>
+                                <th>Trip</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Duration</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for schedule in schedules %}
+                            <tr>
+                                <td>{{ schedule.schedule_no }}</td>
+                                <td>{{ schedule.trip_no }}</td>
+                                <td>{{ schedule.start_time|time:"H:i"|default:"-" }}</td>
+                                <td>{{ schedule.end_time|time:"H:i"|default:"-" }}</td>
+                                <td>
+                                    {% if schedule.start_time and schedule.end_time %}
+                                    {{ schedule.duration }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>{{ schedule.service_type|default:"Regular" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No schedules found for this route</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Parse the Gantt data from the server
+        const ganttData = {{ gantt_data|safe }};
+
+        // Set up the time axis (24 hours)
+        const timeAxis = document.getElementById('timeAxis');
+        const ganttRows = document.getElementById('ganttRows');
+        const conflictAlert = document.getElementById('conflictAlert');
+        const conflictCount = document.getElementById('conflictCount');
+
+        // Create time markers for each hour
+        for (let hour = 0; hour < 24; hour++) {
+            const marker = document.createElement('div');
+            marker.className = 'time-marker';
+            marker.textContent = `${hour}:00`;
+            timeAxis.appendChild(marker);
+        }
+
+        // Function to convert time string to minutes since midnight
+        function timeToMinutes(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+
+        // Function to check if two schedules overlap
+        function checkOverlap(schedule1, schedule2) {
+            const start1 = timeToMinutes(schedule1.start_time);
+            const end1 = timeToMinutes(schedule1.end_time);
+            const start2 = timeToMinutes(schedule2.start_time);
+            const end2 = timeToMinutes(schedule2.end_time);
+
+            return (start1 < end2 && start2 < end1);
+        }
+
+        // Find overlapping schedules
+        const conflicts = [];
+        for (let i = 0; i < ganttData.length; i++) {
+            for (let j = i + 1; j < ganttData.length; j++) {
+                if (checkOverlap(ganttData[i], ganttData[j])) {
+                    if (!conflicts.includes(ganttData[i].id)) {
+                        conflicts.push(ganttData[i].id);
+                    }
+                    if (!conflicts.includes(ganttData[j].id)) {
+                        conflicts.push(ganttData[j].id);
+                    }
+                }
+            }
+        }
+
+        // Update conflict alert if conflicts exist
+        if (conflicts.length > 0) {
+            conflictCount.textContent = conflicts.length;
+            conflictAlert.style.display = 'block';
+        }
+
+        // Create Gantt rows for each schedule
+        ganttData.forEach((schedule, index) => {
+            const row = document.createElement('div');
+            row.className = 'gantt-row';
+
+            const startMinutes = timeToMinutes(schedule.start_time);
+            const endMinutes = timeToMinutes(schedule.end_time);
+            const duration = endMinutes - startMinutes;
+
+            // Calculate position and width based on 24-hour window
+            const startPercent = (startMinutes / (24 * 60)) * 100;
+            const widthPercent = (duration / (24 * 60)) * 100;
+
+            const bar = document.createElement('div');
+            bar.className = 'gantt-bar';
+            if (conflicts.includes(schedule.id)) {
+                bar.classList.add('conflict');
+            }
+
+            bar.style.left = `${startPercent}%`;
+            bar.style.width = `${widthPercent}%`;
+            bar.textContent = `${schedule.schedule_no}-${schedule.trip_no}`;
+            bar.setAttribute('data-schedule', JSON.stringify(schedule));
+
+            // Add tooltip functionality
+            bar.addEventListener('mouseover', function(e) {
+                const scheduleData = JSON.parse(this.getAttribute('data-schedule'));
+
+                const tooltip = document.createElement('div');
+                tooltip.className = 'gantt-bar-tooltip';
+                tooltip.innerHTML = `
+                    <div><strong>Schedule:</strong> ${scheduleData.schedule_no}</div>
+                    <div><strong>Trip:</strong> ${scheduleData.trip_no}</div>
+                    <div><strong>Time:</strong> ${scheduleData.start_time} - ${scheduleData.end_time}</div>
+                    <div><strong>Route:</strong> ${scheduleData.source} to ${scheduleData.destination}</div>
+                    <div><strong>Type:</strong> ${scheduleData.service_type || 'Regular'}</div>
+                `;
+
+                tooltip.style.left = `${e.pageX + 10}px`;
+                tooltip.style.top = `${e.pageY + 10}px`;
+                tooltip.style.display = 'block';
+
+                document.body.appendChild(tooltip);
+
+                this.addEventListener('mousemove', function(e) {
+                    tooltip.style.left = `${e.pageX + 10}px`;
+                    tooltip.style.top = `${e.pageY + 10}px`;
+                });
+
+                this.addEventListener('mouseout', function() {
+                    document.body.removeChild(tooltip);
+                });
+            });
+
+            row.appendChild(bar);
+            ganttRows.appendChild(row);
+        });
+    });
+</script>
+{% endblock %}

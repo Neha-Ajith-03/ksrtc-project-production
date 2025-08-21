@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Schedules</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Add Flatpickr for date range picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Add Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #d9693a;
+            --secondary-color: #4169E1;
+            --dark-color: #333;
+            --light-color: #f8f9fa;
+            --accent-color: #ff6334;
+            --light-bg: #f5f5f5;
+            --text-color: #333;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --hover-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        
+        .header-container {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://source.unsplash.com/random/1600x900/?bus,transport');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 30px 0;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        
+        h1 {
+            font-weight: 700;
+            position: relative;
+            margin-bottom: 0;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            width: 80px;
+            height: 4px;
+            background-color: var(--accent-color);
+            transform: translateX(-50%);
+        }
+        
+        .search-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+            transform: translateY(-20px);
+        }
+        
+        .search-input-group {
+            position: relative;
+        }
+        
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        
+        #scheduleSearch {
+            padding-left: 45px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            height: 50px;
+            font-size: 1rem;
+            box-shadow: none;
+            transition: all 0.3s ease;
+        }
+        
+        #scheduleSearch:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(217, 105, 58, 0.25);
+        }
+        
+        .schedule-card {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            background-color: white;
+            border: none;
+            height: 100%;
+        }
+        
+        .schedule-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .card-body {
+            padding: 25px 20px;
+        }
+        
+        .schedule-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+        }
+        
+        .schedule-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+        
+        .service-badge {
+            display: inline-block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 50px;
+            margin-bottom: 15px;
+            background-color: rgba(217, 105, 58, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .card-footer {
+            border-top: none;
+            background-color: white;
+            padding: 15px 20px 20px;
+        }
+        
+        .btn-view {
+            border-radius: 30px;
+            padding: 8px 0;
+            font-weight: 500;
+            width: 100%;
+            transition: all 0.3s ease;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background-color: transparent;
+        }
+        
+        .btn-view:hover {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 5px 15px rgba(217, 105, 58, 0.3);
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            position: relative;
+            font-weight: 500;
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        .back-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        /* Revenue Analysis Styles */
+        .analysis-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .analysis-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(217, 105, 58, 0.05) 0%, rgba(217, 105, 58, 0) 100%);
+            border-radius: 0 0 0 150px;
+            z-index: 0;
+        }
+        
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .analysis-icon {
+            font-size: 1.8rem;
+            background-color: rgba(217, 105, 58, 0.1);
+            color: var(--primary-color);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .analysis-header:hover .analysis-icon {
+            transform: scale(1.1);
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .analysis-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-color);
+        }
+        
+        .analysis-form {
+            margin-top: 25px;
+            position: relative;
+            z-index: 1;
+            background-color: rgba(245, 245, 245, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        
+        /* Date Range Picker Styles */
+        .date-range-picker {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .date-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+            color: #6c757d;
+            pointer-events: none;
+        }
+        
+        #dateRange {
+            padding-left: 45px;
+            height: 50px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            box-shadow: none;
+            transition: all 0.3s ease;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        #dateRange:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(217, 105, 58, 0.25);
+        }
+        
+        /* Flatpickr Specific Styles */
+        .flatpickr-input {
+            box-sizing: border-box;
+            width: 100%;
+        }
+        
+        .flatpickr-calendar {
+            width: auto !important;
+            min-width: 300px !important;
+            border-radius: 8px !important;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15) !important;
+            border: none !important;
+        }
+        
+        .flatpickr-day.selected, 
+        .flatpickr-day.startRange, 
+        .flatpickr-day.endRange, 
+        .flatpickr-day.selected.inRange, 
+        .flatpickr-day.startRange.inRange, 
+        .flatpickr-day.endRange.inRange, 
+        .flatpickr-day.selected:focus, 
+        .flatpickr-day.startRange:focus, 
+        .flatpickr-day.endRange:focus, 
+        .flatpickr-day.selected:hover, 
+        .flatpickr-day.startRange:hover, 
+        .flatpickr-day.endRange:hover, 
+        .flatpickr-day.selected.prevMonthDay, 
+        .flatpickr-day.startRange.prevMonthDay, 
+        .flatpickr-day.endRange.prevMonthDay, 
+        .flatpickr-day.selected.nextMonthDay, 
+        .flatpickr-day.startRange.nextMonthDay, 
+        .flatpickr-day.endRange.nextMonthDay {
+            background: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+        
+        .flatpickr-day.inRange, 
+        .flatpickr-day.prevMonthDay.inRange, 
+        .flatpickr-day.nextMonthDay.inRange, 
+        .flatpickr-day.today.inRange, 
+        .flatpickr-day.prevMonthDay.today.inRange, 
+        .flatpickr-day.nextMonthDay.today.inRange, 
+        .flatpickr-day:hover, 
+        .flatpickr-day.prevMonthDay:hover, 
+        .flatpickr-day.nextMonthDay:hover, 
+        .flatpickr-day:focus, 
+        .flatpickr-day.prevMonthDay:focus, 
+        .flatpickr-day.nextMonthDay:focus {
+            background: rgba(217, 105, 58, 0.1) !important;
+            border-color: rgba(217, 105, 58, 0.3) !important;
+        }
+        
+        .flatpickr-input.flatpickr-mobile {
+            padding-left: 45px;
+        }
+        
+        .flatpickr-wrapper {
+            width: 100%;
+            display: block;
+        }
+        
+        .schedule-select {
+            margin-bottom: 15px;
+        }
+        
+        .schedule-select .form-select {
+            height: 50px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            padding-left: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .schedule-select .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(217, 105, 58, 0.25);
+        }
+        
+        .btn-analyze {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 30px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(217, 105, 58, 0.3);
+            height: 50px;
+        }
+        
+        .btn-analyze:hover {
+            background-color: #c55a2e;
+            border-color: #c55a2e;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(217, 105, 58, 0.4);
+        }
+        
+        .chart-container {
+            margin-top: 30px;
+            position: relative;
+            height: 400px;
+            display: none;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .chart-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px dashed #dee2e6;
+        }
+        
+        .placeholder-icon {
+            font-size: 3rem;
+            color: #adb5bd;
+            margin-bottom: 15px;
+        }
+        
+        .no-data-message {
+            text-align: center;
+            display: none;
+            padding: 40px;
+            background-color: white;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        /* Tabs for switching between schedule list and revenue analysis */
+        .nav-tabs {
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 25px;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 0;
+            margin-right: 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+            background-color: transparent;
+            border: none;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background-color: transparent;
+            border: none;
+        }
+        
+        .nav-tabs .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .nav-tabs .nav-link .badge {
+            margin-left: 5px;
+            background-color: rgba(217, 105, 58, 0.1);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            padding-top: 10px;
+        }
+        
+        .tab-pane {
+            display: none;
+        }
+        
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .schedule-count {
+            color: var(--primary-color);
+            font-weight: 500;
+            background-color: rgba(217, 105, 58, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 767px) {
+            .schedule-card {
+                margin-bottom: 15px;
+            }
+            
+            .header-container {
+                padding: 20px 0;
+                margin-bottom: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .analysis-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .analysis-icon {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+            
+            /* Mobile-specific date picker adjustments */
+            #dateRange {
+                font-size: 0.9rem;
+            }
+            
+            .flatpickr-calendar {
+                min-width: 280px !important;
+            }
+            
+            .search-box {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-container text-center">
+            <a href="{% url 'main_dashboard' %}" class="back-link">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <h1>Schedules & Revenue Analysis</h1>
+        </div>
+        
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs" id="scheduleTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="schedules-tab" data-bs-toggle="tab" data-bs-target="#schedules-tab-pane" type="button" role="tab" aria-controls="schedules-tab-pane" aria-selected="true">
+                    <i class="bi bi-list-task"></i> Schedule List
+                    <span class="badge">{{ schedules|length }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis-tab-pane" type="button" role="tab" aria-controls="analysis-tab-pane" aria-selected="false">
+                    <i class="bi bi-graph-up"></i> Revenue Analysis
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="scheduleTabsContent">
+            <!-- Schedule List Tab -->
+            <div class="tab-pane fade show active" id="schedules-tab-pane" role="tabpanel" aria-labelledby="schedules-tab" tabindex="0">
+                <div class="search-box">
+                    <div class="search-input-group">
+                        <i class="bi bi-search search-icon"></i>
+                        <input 
+                            type="text" 
+                            id="scheduleSearch" 
+                            class="form-control" 
+                            placeholder="Search schedules by number or service type..."
+                            autocomplete="off"
+                        >
+                    </div>
+                </div>
+                
+                <div class="schedule-count mb-3">
+                    <i class="bi bi-check-circle-fill me-2"></i><span id="countDisplay">Showing all {{ schedules|length }} schedules</span>
+                </div>
+                
+                <div class="row" id="scheduleContainer">
+                    {% if schedules %}
+                        {% for schedule in schedules %}
+                            <div class="col-lg-3 col-md-4 col-sm-6 schedule-item">
+                                <a href="{% url 'trip_list_view' schedule.schedule_no %}" class="schedule-link">
+                                    <div class="schedule-card">
+                                        <div class="card-body text-center">
+                                            <div class="schedule-number">{{ schedule.schedule_no }}</div>
+                                            <div class="service-badge">{{ schedule.service_type }}</div>
+                                        </div>
+                                        <div class="card-footer text-center">
+                                            <button class="btn btn-view">
+                                                <i class="bi bi-arrow-right-circle"></i> View Trips
+                                            </button>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12">
+                            <div class="empty-state">
+                                <i class="bi bi-calendar-x empty-icon"></i>
+                                <h3>No Schedules Found</h3>
+                                <p class="text-muted">There are no schedules available in the database.</p>
+                                <a href="{% url 'schedule_submit' %}" class="btn btn-primary mt-3">
+                                    <i class="bi bi-plus-circle"></i> Add New Schedule
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Revenue Analysis Tab -->
+            <div class="tab-pane fade" id="analysis-tab-pane" role="tabpanel" aria-labelledby="analysis-tab" tabindex="0">
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <div class="analysis-icon">
+                            <i class="bi bi-bar-chart-line"></i>
+                        </div>
+                        <h2 class="analysis-title">Schedule Revenue Analysis</h2>
+                    </div>
+                    <p class="text-muted">Analyze revenue trends across schedules for a selected date range to identify performance patterns and optimize service delivery.</p>
+                    
+                    <form id="revenueAnalysisForm" class="analysis-form">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="date-range-picker">
+                                    <input type="text" id="dateRange" class="form-control" placeholder="Select date range" value="2024-08-05 to 2024-08-23">
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="schedule-select">
+                                    <select id="analyzeScheduleSelect" class="form-select form-control">
+                                        <option value="">Select schedule(s) to analyze</option>
+                                        <option value="all">All Schedules</option>
+                                        {% for schedule in schedules %}
+                                            <option value="{{ schedule.schedule_no }}">{{ schedule.schedule_no }} - {{ schedule.service_type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" id="analyzeBtn" class="btn btn-primary btn-analyze w-100">
+                                    <i class="bi bi-graph-up"></i> Analyze
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div id="chartContainer" class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                        <div id="chartPlaceholder" class="chart-placeholder">
+                            <i class="bi bi-bar-chart placeholder-icon"></i>
+                            <p>Select date range and schedule to view revenue analysis</p>
+                        </div>
+                    </div>
+                    
+                    <div id="noDataMessage" class="no-data-message">
+                        <i class="bi bi-exclamation-circle text-warning mb-3" style="font-size: 2rem;"></i>
+                        <h4>No Revenue Data Available</h4>
+                        <p>There is no revenue data for the selected schedule(s) in this date range.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // Schedule search functionality
+        document.getElementById('scheduleSearch').addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const scheduleItems = document.querySelectorAll('.schedule-item');
+            let visibleCount = 0;
+            
+            scheduleItems.forEach(item => {
+                const scheduleText = item.textContent.toLowerCase();
+                if (scheduleText.includes(searchTerm)) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Update count display
+            const countDisplay = document.getElementById('countDisplay');
+            const totalCount = scheduleItems.length;
+            
+            if (searchTerm === '') {
+                countDisplay.textContent = `Showing all ${totalCount} schedules`;
+            } else if (visibleCount === 0) {
+                countDisplay.textContent = `No schedules found matching "${searchTerm}"`;
+            } else if (visibleCount === 1) {
+                countDisplay.textContent = `Showing 1 schedule matching "${searchTerm}"`;
+            } else {
+                countDisplay.textContent = `Showing ${visibleCount} schedules matching "${searchTerm}"`;
+            }
+        });
+
+        // Initialize date range picker
+        const dateRangePicker = flatpickr("#dateRange", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "F j, Y",
+            maxDate: "today",
+            defaultDate: [new Date().setDate(new Date().getDate() - 30), new Date()],
+        });
+
+        // Revenue chart variable
+        let revenueChart = null;
+
+        document.getElementById('analyzeBtn').addEventListener('click', function() {
+            // Get date range
+            const dateRange = document.getElementById('dateRange').value;
+            if (!dateRange) {
+                alert('Please select a date range');
+                return;
+            }
+            
+            // Get selected schedule
+            const scheduleSelect = document.getElementById('analyzeScheduleSelect');
+            const selectedSchedule = scheduleSelect.value;
+            if (!selectedSchedule) {
+                alert('Please select a schedule to analyze');
+                return;
+            }
+            
+            // Show loading state
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Analyzing...';
+            this.disabled = true;
+            
+            // Clear previous chart and messages
+            if (revenueChart) {
+                revenueChart.destroy();
+                revenueChart = null;
+            }
+            document.getElementById('chartPlaceholder').style.display = 'none';
+            document.getElementById('noDataMessage').style.display = 'none';
+            document.getElementById('chartContainer').style.display = 'none';
+            
+            // Fetch revenue data
+            fetchRevenueData(selectedSchedule, dateRange)
+                .then(data => {
+                    // Reset button
+                    this.innerHTML = '<i class="bi bi-graph-up"></i> Analyze';
+                    this.disabled = false;
+                    
+                    // Process and display data
+                    displayRevenueChart(data);
+                })
+                .catch(error => {
+                    // Reset button
+                    this.innerHTML = '<i class="bi bi-graph-up"></i> Analyze';
+                    this.disabled = false;
+                    
+                    // Show error
+                    console.error('Error fetching revenue data:', error);
+                    document.getElementById('noDataMessage').style.display = 'block';
+                    document.getElementById('chartContainer').style.display = 'none';
+                });
+        });
+
+        // Function to fetch revenue data from the API
+        function fetchRevenueData(scheduleNo, dateRange) {
+            // Parse the date range
+            const dates = dateRange.split(' to ');
+            const startDate = dates[0];
+            const endDate = dates.length > 1 ? dates[1] : dates[0];
+            
+            // Build the API URL
+            const apiUrl = `/route/revenue-analysis/?schedule_no=${encodeURIComponent(scheduleNo)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
+            
+            // Fetch the data
+            return fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(responseData => {
+                    return responseData.data || [];
+                });
+        }
+
+        // Generate array of dates from the date range string
+        function generateDateRange(dateRangeStr) {
+            const dates = dateRangeStr.split(' to ');
+            const startDate = new Date(dates[0]);
+            const endDate = dates.length > 1 ? new Date(dates[1]) : new Date(dates[0]);
+            
+            const dateArray = [];
+            let currentDate = new Date(startDate);
+
+            
+            while (currentDate <= endDate) {
+                dateArray.push(formatDate(new Date(currentDate)));
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            return dateArray;
+        }
+
+        // Format date as YYYY-MM-DD
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Display the revenue chart
+        function displayRevenueChart(data) {
+            // Get references to DOM elements
+            const chartContainer = document.getElementById('chartContainer');
+            const noDataMessage = document.getElementById('noDataMessage');
+            
+            // Always destroy previous chart and remove canvas
+            if (revenueChart) {
+                revenueChart.destroy();
+                revenueChart = null;
+            }
+            
+            // Remove and recreate the canvas element to ensure a complete reset
+            const oldCanvas = document.getElementById('revenueChart');
+            if (oldCanvas) {
+                oldCanvas.remove();
+            }
+            const newCanvas = document.createElement('canvas');
+            newCanvas.id = 'revenueChart';
+            chartContainer.appendChild(newCanvas);
+            
+            // Check if data exists
+            if (!data || data.length === 0 || !data[0] || !data[0].dates || data[0].dates.length === 0) {
+                // Hide chart container and show no data message
+                chartContainer.style.display = 'none';
+                noDataMessage.style.display = 'block';
+                return;
+            }
+            
+            // Show chart container and hide no data message
+            chartContainer.style.display = 'block';
+            noDataMessage.style.display = 'none';
+            
+            const ctx = newCanvas.getContext('2d');
+            
+            // Prepare datasets
+            const datasets = data.map((scheduleData, index) => {
+                // Generate a color based on index
+                const hue = (index * 137) % 360; // Golden angle to distribute colors
+                const color = `hsl(${hue}, 70%, 50%)`;
+                
+                return {
+                    label: `Schedule ${scheduleData.schedule}`,
+                    data: scheduleData.revenues,
+                    borderColor: color,
+                    backgroundColor: `hsla(${hue}, 70%, 90%, 0.5)`,
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    fill: false,
+                    spanGaps: true // This allows the line to skip over null/undefined values
+                };
+            });
+            
+            // Create new chart with updated colors to match theme
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data[0].dates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Daily Revenue Analysis',
+                            font: {
+                                size: 16,
+                                weight: 'bold',
+                                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            },
+                            color: '#333'
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 15,
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#333',
+                            bodyColor: '#333',
+                            borderColor: '#ddd',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            padding: 12,
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                            titleFont: {
+                                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.raw === 0 || context.raw === null || context.raw === undefined) {
+                                        return `${context.dataset.label}: No data`;
+                                    }
+                                    return `${context.dataset.label}: ₹${context.raw.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {
+                                    family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                borderDash: [2, 4]
+                            },
+                            ticks: {
+                                font: {
+                                    family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                                },
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    },
+                    animations: {
+                        tension: {
+                            duration: 1000,
+                            easing: 'linear'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Handle tab switching
+        document.querySelectorAll('#scheduleTabs .nav-link').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs and tab panes
+                document.querySelectorAll('#scheduleTabs .nav-link').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => {
+                    p.classList.remove('show', 'active');
+                });
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Show corresponding tab pane
+                const target = this.getAttribute('data-bs-target');
+                const pane = document.querySelector(target);
+                if (pane) {
+                    pane.classList.add('show', 'active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

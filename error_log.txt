@@ -1,0 +1,112 @@
+Skipping row 0 in 1.xlsx (1679N) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Processed 107 sheets in 1.xlsx
+Processed 38 sheets in 2.xlsx
+Skipping row 0 in 4.xlsx (1679BH) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 4.xlsx (1523AC) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 4.xlsx (1567AA) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Processed 15 sheets in 4.xlsx
+Skipping row 0 in 3.xlsx (1566B) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1262) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1263) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1567Y) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1269) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1679AZ) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1523AA) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1679BC) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1278) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1679BD) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1523AB) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1518F) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1542F) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Skipping row 0 in 3.xlsx (1679BE) due to error: invalid literal for int() with base 10: 'Order Sequence'
+Traceback (most recent call last):
+  File "/home/jeev/minister/ksrtc_platform_production/conv_route.py", line 56, in excel_to_json_folder
+    order_sequence = int(row.iloc[0])  # Expected Column A
+ValueError: invalid literal for int() with base 10: 'Order Sequence'
+
+Processed 46 sheets in 3.xlsx

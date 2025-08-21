@@ -1,0 +1,132 @@
+{% extends 'depot_manager/base.html' %}
+{% load static %}
+
+{% block title %}Assign Trips - Depot Manager{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Assign Trips</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'depot_manager_index' %}">Depot Manager</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'employee_list' %}">Employees</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Assign Trips</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Trip Assignment Form</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'assign_trips' %}">
+                        {% csrf_token %}
+
+                        {% if messages %}
+                        <div class="alert alert-info">
+                            {% for message in messages %}
+                            {{ message }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="employee_id" class="form-label">Employee</label>
+                                <select name="employee_id" id="employee_id" class="form-select" required>
+                                    <option value="">Select Employee</option>
+                                    {% for employee in employees %}
+                                    <option value="{{ employee.emp_id }}" data-role="{{ employee.role }}" {% if preselected_employee == employee.emp_id %}selected{% endif %}>
+                                        {{ employee.emp_id }} - {{ employee.name }} ({{ employee.get_role_display }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="role" class="form-label">Role</label>
+                                <select name="role" id="role" class="form-select" required>
+                                    <option value="">Select Role</option>
+                                    <option value="driver">Driver</option>
+                                    <option value="conductor">Conductor</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="schedule_id" class="form-label">Schedule</label>
+                            <select name="schedule_id" id="schedule_id" class="form-select" required>
+                                <option value="">Select Schedule</option>
+                                {% for schedule in schedules %}
+                                <option value="{{ schedule.id }}">
+                                    {{ schedule.schedule_no }} - Trip {{ schedule.trip_no }} ({{ schedule.source }} to {{ schedule.destination }})
+                                    {% if schedule.start_time %} - {{ schedule.start_time|time:"H:i" }}{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="assignment_date" class="form-label">Assignment Date</label>
+                                <input type="date" name="assignment_date" id="assignment_date" class="form-control" value="{{ tomorrow|date:'Y-m-d' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="slot" class="form-label">Time Slot</label>
+                                <select name="slot" id="slot" class="form-select">
+                                    <option value="full_day">Full Day</option>
+                                    <option value="morning">Morning</option>
+                                    <option value="afternoon">Afternoon</option>
+                                    <option value="evening">Evening</option>
+                                    <option value="night">Night</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="assigned_time" class="form-label">Scheduled Departure Time (Optional)</label>
+                            <input type="time" name="assigned_time" id="assigned_time" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="remarks" class="form-label">Remarks</label>
+                            <textarea name="remarks" id="remarks" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">Assign Trip</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-select role based on employee selection
+        document.getElementById('employee_id').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const role = selectedOption.getAttribute('data-role');
+            const roleSelect = document.getElementById('role');
+
+            if (role === 'driver' || role === 'conductor') {
+                roleSelect.value = role;
+            } else {
+                roleSelect.value = '';
+            }
+        });
+
+        // Trigger the change event on page load to set the role based on preselected employee
+        if (document.getElementById('employee_id').value) {
+            document.getElementById('employee_id').dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+{% endblock %}

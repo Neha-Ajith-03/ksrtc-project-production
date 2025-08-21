@@ -1,0 +1,380 @@
+<!-- templates/bus_route/enhanced_schedule_analysis.html -->
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .analysis-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .map-container {
+            height: 600px;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .metric-card {
+            background-color: #198754;
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .metric-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .navbar {
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            height: 300px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+   
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'main_dashboard' %}">KSRTC Schedule Analyzer</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'main_dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'bus_route_view' %}">Route Planner</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'bus_route_by_schedule_view' %}">Schedule Analyzer</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'schedule_submit' %}">Schedule Submission</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="analysis-container">
+            <h1 class="mb-4">Schedule Analysis: {{ schedule.schedule_no }} - Trip {{ schedule.trip_no }}</h1>
+            
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="metric-card">
+                        <div class="metric-value">₹{{ total_revenue|floatformat:2 }}</div>
+                        <div class="metric-label">Total Revenue</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metric-card">
+                        <div class="metric-value">{{ total_distance|floatformat:1 }} km</div>
+                        <div class="metric-label">Total Distance</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metric-card">
+                        <div class="metric-value">₹{{ epkm|floatformat:2 }}</div>
+                        <div class="metric-label">EPKM</div>
+                    </div>
+                </div>
+            </div>
+            
+      
+            <h2 class="mb-3">Route Map</h2>
+            <div class="map-container">
+                {{ map_html|safe }}
+            </div>
+            
+            <h2 class="mb-3">Revenue Analysis</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="revenueByStopChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="fareStageRevenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+       
+            <h2 class="mb-3">Bus Stop Details</h2>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Sequence</th>
+                            <th>Stop Name</th>
+                            <th>Fare Stage</th>
+                            <th>Revenue</th>
+                            <th>Coordinates</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stop in bus_stops %}
+                        <tr {% if stop.is_fare_stage %}class="table-success"{% endif %}>
+                            <td>{{ stop.sequence }}</td>
+                            <td>{{ stop.name }}</td>
+                            <td>{% if stop.is_fare_stage %}Yes{% else %}No{% endif %}</td>
+                            <td>₹{{ stop.revenue|default:0|floatformat:2 }}</td>
+                            <td>{{ stop.latitude|floatformat:6 }}, {{ stop.longitude|floatformat:6 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        // Pass data from Django to JavaScript as JSON
+        const busStops = JSON.parse('{{ bus_stops|escapejs|safe }}');
+        
+        // Revenue by Stop Chart
+        const stopCtx = document.getElementById('revenueByStopChart').getContext('2d');
+        
+        // Prepare data for bar chart
+        const stopLabels = busStops.map(stop => stop.name);
+        const stopData = busStops.map(stop => stop.revenue || 0);
+        const stopColors = busStops.map(stop => 
+            stop.is_fare_stage ? 'rgba(40, 167, 69, 0.8)' : 'rgba(0, 123, 255, 0.8)'
+        );
+        const stopBorders = busStops.map(stop => 
+            stop.is_fare_stage ? 'rgba(40, 167, 69, 1)' : 'rgba(0, 123, 255, 1)'
+        );
+        
+        const revenueByStopChart = new Chart(stopCtx, {
+            type: 'bar',
+            data: {
+                labels: stopLabels,
+                datasets: [{
+                    label: 'Revenue by Stop',
+                    data: stopData,
+                    backgroundColor: stopColors,
+                    borderColor: stopBorders,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Revenue (₹)'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Revenue by Bus Stop'
+                    }
+                }
+            }
+        });
+        
+        // Fare Stage Revenue Chart
+        const fareStageCtx = document.getElementById('fareStageRevenueChart').getContext('2d');
+        
+        // Filter only fare stages
+        const fareStages = busStops.filter(stop => stop.is_fare_stage);
+        const fareStageLabels = fareStages.map(stop => stop.name);
+        const fareStageData = fareStages.map(stop => stop.revenue || 0);
+        
+        const fareStageColors = [
+            'rgba(40, 167, 69, 0.8)',
+            'rgba(0, 123, 255, 0.8)',
+            'rgba(255, 193, 7, 0.8)',
+            'rgba(220, 53, 69, 0.8)',
+            'rgba(111, 66, 193, 0.8)',
+            'rgba(23, 162, 184, 0.8)',
+            'rgba(255, 127, 80, 0.8)'
+        ];
+        
+        const fareStageRevenueChart = new Chart(fareStageCtx, {
+            type: 'pie',
+            data: {
+                labels: fareStageLabels,
+                datasets: [{
+                    label: 'Revenue by Fare Stage',
+                    data: fareStageData,
+                    backgroundColor: fareStageColors.slice(0, fareStageLabels.length),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Revenue by Fare Stage'
+                    },
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+This is an HTML comment --><!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Schedule Analysis</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            body { padding-top: 60px; background-color: #f8f9fa; }
+            .card { margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .metric { padding: 15px; text-align: center; background-color: #198754; color: white; border-radius: 5px; }
+            .metric-value { font-size: 24px; font-weight: bold; }
+            .table-container { overflow-x: auto; }
+            .fare-stage { background-color: rgba(40, 167, 69, 0.1); }
+        </style>
+    </head>
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="#">KSRTC Schedule Analyzer</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Route Planner</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">Schedule Analyzer</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    
+        <div class="container">
+            <!-- Summary Metrics -->
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Schedule Analysis: {{ schedule.schedule_no|default:"" }} - Trip {{ schedule.trip_no|default:"" }}</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="metric">
+                                <div class="metric-value">₹{{ total_revenue|default:0|floatformat:2 }}</div>
+                                <div>Total Revenue</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="metric">
+                                <div class="metric-value">{{ total_distance|default:0|floatformat:1 }} km</div>
+                                <div>Total Distance</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="metric">
+                                <div class="metric-value">₹{{ epkm|default:0|floatformat:2 }}</div>
+                                <div>Earnings Per KM</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Route Map -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Route Map</h3>
+                </div>
+                <div class="card-body p-0">
+                    {{ map_html|safe }}
+                </div>
+            </div>
+            
+            <!-- Bus Stop Details -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Bus Stop Details</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Sequence</th>
+                                    <th>Stop Name</th>
+                                    <th>Fare Stage</th>
+                                    <th>Revenue</th>
+                                    <th>Coordinates</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stop in bus_stops %}
+                                <tr {% if stop.is_fare_stage %}class="fare-stage"{% endif %}>
+                                    <td>{{ stop.sequence|default:"" }}</td>
+                                    <td>{{ stop.name|default:"" }}</td>
+                                    <td>
+                                        {% if stop.is_fare_stage %}
+                                        <span class="badge bg-success">Yes</span>
+                                        {% else %}
+                                        No
+                                        {% endif %}
+                                    </td>
+                                    <td>₹{{ stop.revenue|default:0|floatformat:2 }}</td>
+                                    <td>{{ stop.latitude|floatformat:6 }}, {{ stop.longitude|floatformat:6 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="mb-4 text-center">
+                <a href="#" class="btn btn-secondary">Back to Schedule Form</a>
+                <a href="#" class="btn btn-success">Back to Dashboard</a>
+            </div>
+        </div>
+    
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+    </html>

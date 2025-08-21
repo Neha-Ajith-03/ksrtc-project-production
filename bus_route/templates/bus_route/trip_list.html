@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trips for Schedule {{ schedule.schedule_no }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Add Flatpickr for better date picking -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Add Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #d9693a;
+            --primary-light: rgba(217, 105, 58, 0.1);
+            --primary-dark: #c55a2e;
+            --secondary-color: #4169E1;
+            --accent-color: #ff6334;
+            --light-bg: #f5f5f5;
+            --text-color: #333;
+            --text-secondary: #4A5568;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --hover-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            padding-top: 30px;
+            padding-bottom: 60px;
+            color: var(--text-color);
+        }
+        
+        .header-container {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://source.unsplash.com/random/1600x900/?bus,transport');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 40px 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        
+        h1 {
+            font-weight: 800;
+            position: relative;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+            letter-spacing: -0.5px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background-color: var(--accent-color);
+        }
+        
+        .schedule-details {
+            position: relative;
+            font-size: 1.05rem;
+            opacity: 0.95;
+            margin-bottom: 0;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .trip-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            border: none;
+            height: 100%;
+        }
+        
+        .trip-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .trip-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            background-color: white;
+            position: relative;
+        }
+        
+        .trip-body {
+            padding: 24px;
+            background-color: #FAFBFF;
+        }
+        
+        .trip-footer {
+            padding: 18px 24px;
+            background-color: white;
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        
+        .metrics {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .metric {
+            text-align: center;
+            background-color: white;
+            padding: 14px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 90px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: var(--transition);
+        }
+        
+        .metric:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .metric-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 18px;
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 30px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .back-btn i {
+            margin-right: 8px;
+        }
+        
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            text-decoration: none;
+            color: white;
+        }
+        
+        .filter-section {
+            background-color: white;
+            padding: 24px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            z-index: 2;
+            transform: translateY(-20px);
+        }
+        
+        .filter-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-title i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+        
+        .route-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .route-filter-btn {
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid #dee2e6;
+            background-color: white;
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+        
+        .route-filter-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .route-filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .search-wrapper {
+            position: relative;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        
+        #tripSearch {
+            padding-left: 40px;
+            border-radius: 8px;
+            height: 46px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            transition: var(--transition);
+        }
+        
+        #tripSearch:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(217, 105, 58, 0.25);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+        
+        .section-title i {
+            margin-right: 12px;
+            color: var(--primary-color);
+            font-size: 1.6rem;
+        }
+        
+        .trip-count {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            background-color: var(--primary-light);
+            padding: 5px 14px;
+            border-radius: 20px;
+            margin-left: 15px;
+            font-weight: 600;
+        }
+        
+        .route-badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            box-shadow: 0 2px 5px rgba(217, 105, 58, 0.2);
+        }
+        
+        .trip-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 0;
+            padding-right: 80px;
+            letter-spacing: -0.5px;
+        }
+        
+        .date-info {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .date-info i {
+            margin-right: 6px;
+            color: var(--primary-color);
+        }
+        
+        .view-btn {
+            padding: 12px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: var(--transition);
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(217, 105, 58, 0.3);
+        }
+        
+        .view-btn:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(217, 105, 58, 0.4);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 30px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+        }
+        
+        .empty-state i {
+            font-size: 4rem; 
+            color: #CBD5E0; 
+            margin-bottom: 24px;
+            display: block;
+        }
+        
+        .empty-state h3 {
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 12px;
+        }
+        
+        .empty-state p {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto 24px;
+        }
+        
+        /* Date picker styles */
+        .date-picker-wrapper {
+            position: relative;
+        }
+        
+        .date-picker-wrapper .bi {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        
+        #datePicker {
+            padding-left: 40px;
+            border-radius: 8px;
+            height: 46px;
+            cursor: pointer;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        #datePicker:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(217, 105, 58, 0.25);
+        }
+        
+        .date-quick-filter {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .quick-date {
+            border-radius: 8px;
+            font-weight: 500;
+            border-color: #E2E8F0;
+            color: var(--text-color);
+            transition: var(--transition);
+            padding: 6px 12px;
+        }
+        
+        .quick-date:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        /* Route dropdown */
+        .route-select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+            cursor: pointer;
+            height: 46px;
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            transition: var(--transition);
+        }
+        
+        .route-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(217, 105, 58, 0.25);
+        }
+        
+        /* Trip Card Improved Styles */
+        .trip-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .trip-icon {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+        
+        .trip-card:hover .trip-icon {
+            background-color: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .trip-detail {
+            flex: 1;
+        }
+        
+        .route-info {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-top: 1px solid rgba(0,0,0,0.04);
+            margin: 0;
+        }
+        
+        .route-info:first-of-type {
+            border-top: none;
+            padding-top: 0;
+        }
+        
+        .route-info:last-of-type {
+            padding-bottom: 0;
+        }
+        
+        .route-icon {
+            color: var(--primary-color);
+            margin-right: 12px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            background-color: var(--primary-light);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .route-text {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
+        .card-divider {
+            height: 1px;
+            background-color: #EDF2F7;
+            margin: 16px 0;
+        }
+        
+        /* Trip Revenue Analysis Styles */
+        .nav-tabs {
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 25px;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 0;
+            margin-right: 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+            background-color: transparent;
+            border: none;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background-color: transparent;
+            border: none;
+        }
+        
+        .nav-tabs .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .nav-tabs .nav-link .badge {
+            margin-left: 5px;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            padding-top: 10px;
+        }
+        
+        .tab-pane {
+            display: none;
+        }
+        
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .analysis-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .analysis-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(217, 105, 58, 0.05) 0%, rgba(217, 105, 58, 0) 100%);
+            border-radius: 0 0 0 150px;
+            z-index: 0;
+        }
+        
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .analysis-icon {
+            font-size: 1.8rem;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            transition: var(--transition);
+        }
+        
+        .analysis-header:hover .analysis-icon {
+            transform: scale(1.1);
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .analysis-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-color);
+        }
+        
+        .analysis-form {
+            margin-top: 25px;
+            position: relative;
+            z-index: 1;
+            background-color: rgba(245, 245, 245, 0.5);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        
+        .date-range-picker {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .date-icon {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        
+        #analysisDateRange {
+            padding-left: 45px;
+            height: 50px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            box-shadow: none;
+            transition: all 0.3s ease;
+        }
+        
+        #analysisDateRange:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(217, 105, 58, 0.25);
+        }
+        
+        .trip-select .form-select {
+            height: 50px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .trip-select .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(217, 105, 58, 0.25);
+        }
+        
+        .btn-analyze {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 30px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            height: 50px;
+            box-shadow: 0 5px 15px rgba(217, 105, 58, 0.3);
+        }
+        
+        .btn-analyze:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(217, 105, 58, 0.4);
+        }
+        
+        .chart-container {
+            margin-top: 30px;
+            position: relative;
+            height: 400px;
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .chart-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px dashed #dee2e6;
+        }
+        
+        .placeholder-icon {
+            font-size: 3rem;
+            color: #adb5bd;
+            margin-bottom: 15px;
+        }
+        
+        .no-data-message {
+            text-align: center;
+            display: none;
+            padding: 40px;
+            background-color: white;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        /* Flatpickr Specific Styles */
+        .flatpickr-day.selected, 
+        .flatpickr-day.startRange, 
+        .flatpickr-day.endRange, 
+        .flatpickr-day.selected.inRange, 
+        .flatpickr-day.startRange.inRange, 
+        .flatpickr-day.endRange.inRange, 
+        .flatpickr-day.selected:focus, 
+        .flatpickr-day.startRange:focus, 
+        .flatpickr-day.endRange:focus, 
+        .flatpickr-day.selected:hover, 
+        .flatpickr-day.startRange:hover, 
+        .flatpickr-day.endRange:hover, 
+        .flatpickr-day.selected.prevMonthDay, 
+        .flatpickr-day.startRange.prevMonthDay, 
+        .flatpickr-day.endRange.prevMonthDay, 
+        .flatpickr-day.selected.nextMonthDay, 
+        .flatpickr-day.startRange.nextMonthDay, 
+        .flatpickr-day.endRange.nextMonthDay {
+            background: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+        
+        .flatpickr-day.inRange, 
+        .flatpickr-day.prevMonthDay.inRange, 
+        .flatpickr-day.nextMonthDay.inRange, 
+        .flatpickr-day.today.inRange, 
+        .flatpickr-day.prevMonthDay.today.inRange, 
+        .flatpickr-day.nextMonthDay.today.inRange, 
+        .flatpickr-day:hover, 
+        .flatpickr-day.prevMonthDay:hover, 
+        .flatpickr-day.nextMonthDay:hover, 
+        .flatpickr-day:focus, 
+        .flatpickr-day.prevMonthDay:focus, 
+        .flatpickr-day.nextMonthDay:focus {
+            background: rgba(217, 105, 58, 0.1) !important;
+            border-color: rgba(217, 105, 58, 0.3) !important;
+        }
+        
+        /* Added styles for better responsive design */
+        @media (max-width: 767px) {
+            .header-container {
+                padding: 20px;
+                margin-bottom: 24px;
+            }
+            
+            .filter-section {
+                padding: 18px;
+                transform: translateY(0);
+            }
+            
+            .filter-row > div {
+                margin-bottom: 18px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+            
+            .back-btn {
+                font-size: 0.9rem;
+                padding: 8px 14px;
+                margin-top: 10px;
+            }
+            
+            .trip-number {
+                font-size: 1.3rem;
+                padding-right: 0;
+            }
+            
+            .route-badge {
+                position: static;
+                display: inline-block;
+                margin-top: 10px;
+                margin-bottom: 5px;
+            }
+            
+            .trip-header {
+                padding: 16px 20px;
+            }
+            
+            .trip-body, .trip-footer {
+                padding: 16px 20px;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+            
+            .section-title i {
+                font-size: 1.4rem;
+            }
+            
+            .analysis-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .analysis-icon {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+        
+        /* Animation for cards */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .trip-card {
+            animation: fadeIn 0.4s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        /* Staggered animation for multiple cards */
+        .trip-item:nth-child(1) .trip-card { animation-delay: 0.1s; }
+        .trip-item:nth-child(2) .trip-card { animation-delay: 0.15s; }
+        .trip-item:nth-child(3) .trip-card { animation-delay: 0.2s; }
+        .trip-item:nth-child(4) .trip-card { animation-delay: 0.25s; }
+        .trip-item:nth-child(5) .trip-card { animation-delay: 0.3s; }
+        .trip-item:nth-child(6) .trip-card { animation-delay: 0.35s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1>Schedule {{ schedule_no }}</h1>
+                    {% if trips and trips.0 %}
+                    <p class="schedule-details">
+                        <i class="bi bi-pin-map-fill"></i> {{ trips.0.source }} to {{ trips.0.destination }} 
+                        {% if trips.0.via %} via {{ trips.0.via }}{% endif %}
+                        <br/>
+                        <i class="bi bi-info-circle"></i> Route: {{ trips.0.route_no }} | Trip KM: {{ trips.0.trip_km }} | {{ trips.0.service_type }}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="col-md-4 text-md-end text-center mt-3 mt-md-0">
+                    <a href="{% url 'schedule_list_view' %}" class="back-btn">
+                        <i class="bi bi-arrow-left"></i> Back to Schedules
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs" id="tripTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="trips-tab" data-bs-toggle="tab" data-bs-target="#trips-tab-pane" type="button" role="tab" aria-controls="trips-tab-pane" aria-selected="true">
+                    <i class="bi bi-list-task"></i> Trip List
+                    <span class="badge">{{ trips|length }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis-tab-pane" type="button" role="tab" aria-controls="analysis-tab-pane" aria-selected="false">
+                    <i class="bi bi-graph-up"></i> Revenue Analysis
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="tripTabsContent">
+            <!-- Trip List Tab -->
+            <div class="tab-pane fade show active" id="trips-tab-pane" role="tabpanel" aria-labelledby="trips-tab" tabindex="0">
+               <!-- Filter Section -->
+                <div class="filter-section">
+                    <div class="row filter-row">
+                        <!-- Date Filter -->
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="filter-title">
+                                <i class="bi bi-calendar3"></i> Select Date
+                            </div>
+                            <form id="dateFilterForm" method="get">
+                                <div class="date-picker-wrapper">
+                                    <input type="text" id="datePicker" name="date" class="form-control" value="{{ selected_date }}" placeholder="Select date">
+                                </div>
+                                <div class="date-quick-filter">
+                                    <button type="button" class="btn btn-sm btn-outline-primary quick-date" data-days="0">Today</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary quick-date" data-days="-1">Yesterday</button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary quick-date" data-days="-7">Last Week</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="filter-title">
+                                <i class="bi bi-funnel"></i> Filter by Route
+                            </div>
+                            <select id="routeSelect" class="route-select form-select">
+                                <option value="all">All Routes</option>
+                                {% for route in routes %}
+                                    <option value="{{ route }}">{{ route }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="filter-title">
+                                <i class="bi bi-search"></i> Search Trips
+                            </div>
+                            <div class="search-wrapper">
+                                <i class="bi bi-search search-icon"></i>
+                                <input type="text" id="tripSearch" class="form-control" placeholder="Search by trip number...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-title">
+                    <i class="bi bi-calendar-check"></i> 
+                    Trips for {{ selected_date|date:"F d, Y" }}
+                    <span class="trip-count">{{ trips|length }} trips</span>
+                </div>
+                
+                {% if trips %}
+                    <div class="row" id="tripsContainer">
+                    {% for s in trips %}
+                        <div class="col-md-6 col-lg-4 trip-item" data-route="{{ s.route_no }}" data-trip-no="{{ s.trip_no }}">
+                            <div class="trip-card">
+                                <div class="trip-header">
+                                    <span class="route-badge">Route {{ s.route_no }}</span>
+                                    <div class="trip-info">
+                                        <div class="trip-icon">
+                                            <i class="bi bi-bus-front"></i>
+                                        </div>
+                                        <div class="trip-detail">
+                                            <h3 class="trip-number">Trip {{ s.trip_no }}</h3>
+                                            <p class="date-info">
+                                                <i class="bi bi-calendar-date"></i> {{ s.date }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="trip-body">
+                                    <div class="route-info">
+                                        <span class="route-icon"><i class="bi bi-geo-alt"></i></span>
+                                        <span class="route-text">Source: <strong>{{ s.source }}</strong></span>
+                                    </div>
+                                    <div class="route-info">
+                                        <span class="route-icon"><i class="bi bi-signpost-split"></i></span>
+                                        <span class="route-text">Via: <strong>{{ s.via }}</strong></span>
+                                    </div>
+                                    <div class="route-info">
+                                        <span class="route-icon"><i class="bi bi-geo-alt-fill"></i></span>
+                                        <span class="route-text">Destination: <strong>{{ s.destination }}</strong></span>
+                                    </div>
+                                    
+                                    
+                                    <div class="route-info">
+                                        <span class="route-icon"><i class="bi bi-clock"></i></span>
+                                        <span class="route-text">Start Time: <strong>{{ s.start_time }}</strong></span>
+                                    </div>
+                                    <div class="route-info">
+                                        <span class="route-icon"><i class="bi bi-clock-fill"></i></span>
+                                        <span class="route-text">End Time: <strong>{{ s.end_time }}</strong></span>
+                                    </div>
+                                    <div class="route-info">
+                                        <span class="route-icon"><i class="bi bi-pin-map"></i></span>
+                                        <span class="route-text">Trip Distance: <strong>{{ s.trip_km }} km</strong></span>
+                                    </div>
+                                    
+                                    {% if s.revenue is not None or s.trip_km is not None or s.epkm is not None %}
+                                    <div class="card-divider"></div>
+                                    
+                                    <div class="metrics">
+                                        {% if s.revenue is not None %}
+                                            <div class="metric">
+                                                <div class="metric-value">₹{{ s.revenue|floatformat:2 }}</div>
+                                                <div class="metric-label">Revenue</div>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if s.epkm is not None %}
+                                            <div class="metric">
+                                                <div class="metric-value">₹{{ s.epkm|floatformat:2 }}</div>
+                                                <div class="metric-label">EPKM</div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="trip-footer">
+                                    <a href="{% url 'trip_map_view' schedule_no=s.schedule_no trip_no=s.trip_no route_no=s.route_no %}" class="btn btn-primary view-btn w-100">
+                                        <i class="bi bi-map"></i> View Trip Map
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-x empty-icon"></i>
+                        <h3>No Trips Found</h3>
+                        <p class="text-muted">There are no trips available for this schedule on {{ selected_date|date:"F d, Y" }}.</p>
+                        <a href="{% url 'schedule_submit' %}" class="btn btn-primary mt-3">
+                            <i class="bi bi-plus-circle"></i> Add New Trip
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Revenue Analysis Tab -->
+            <div class="tab-pane fade" id="analysis-tab-pane" role="tabpanel" aria-labelledby="analysis-tab" tabindex="0">
+                <div class="analysis-card">
+                    <div class="analysis-header">
+                        <div class="analysis-icon">
+                            <i class="bi bi-bar-chart-line"></i>
+                        </div>
+                        <h2 class="analysis-title">Trip Revenue Analysis</h2>
+                    </div>
+                    <p class="text-muted">Analyze revenue trends across trips for this schedule within a selected date range to identify performance patterns and improve service delivery.</p>
+                    
+                    <form id="revenueAnalysisForm" class="analysis-form">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="date-range-picker">
+                                    <input type="text" id="analysisDateRange" class="form-control" placeholder="Select date range">
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="trip-select">
+                                    <select id="analyzeTripSelect" class="form-select form-control">
+                                        <option value="">Select trip(s) to analyze</option>
+                                        <option value="all">All Trips</option>
+                                        {% for s in trips %}
+                                            <option value="{{ s.trip_no }}">Trip {{ s.trip_no }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" id="analyzeTripBtn" class="btn btn-primary btn-analyze w-100">
+                                    <i class="bi bi-graph-up"></i> Analyze
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div id="tripChartContainer" class="chart-container">
+                        <canvas id="tripRevenueChart"></canvas>
+                        <div id="tripChartPlaceholder" class="chart-placeholder">
+                            <i class="bi bi-bar-chart placeholder-icon"></i>
+                            <p>Select date range and trip to view revenue analysis</p>
+                        </div>
+                    </div>
+                    
+                    <div id="tripNoDataMessage" class="no-data-message">
+                        <i class="bi bi-exclamation-circle text-warning mb-3" style="font-size: 2rem;"></i>
+                        <h4>No Revenue Data Available</h4>
+                        <p>There is no revenue data for the selected trip(s) in this date range.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+     document.addEventListener('DOMContentLoaded', function() {
+      // Initialize date picker
+      const datePicker = flatpickr("#datePicker", {
+          dateFormat: "Y-m-d",
+          altInput: true,
+          altFormat: "F j, Y",
+          onChange: function(selectedDates, dateStr) {
+              document.getElementById('dateFilterForm').submit();
+          }
+      });
+      
+      // Initialize date range picker for analysis
+      const analysisDateRangePicker = flatpickr("#analysisDateRange", {
+          mode: "range",
+          dateFormat: "Y-m-d",
+          altInput: true,
+          altFormat: "F j, Y",
+          maxDate: "today",
+          defaultDate: [new Date().setDate(new Date().getDate() - 30), new Date()],
+      });
+      
+      // Quick date filters
+      document.querySelectorAll('.quick-date').forEach(button => {
+          button.addEventListener('click', function() {
+              const days = parseInt(this.getAttribute('data-days'));
+              const today = new Date();
+              const targetDate = new Date();
+              targetDate.setDate(today.getDate() + days);
+              
+              datePicker.setDate(targetDate);
+              document.getElementById('dateFilterForm').submit();
+          });
+      });
+      
+      // Route filtering and search
+      const routeSelect = document.getElementById('routeSelect');
+      const tripItems = document.querySelectorAll('.trip-item');
+      const searchInput = document.getElementById('tripSearch');
+      const tripCount = document.querySelector('.trip-count');
+      
+      function updateVisibleCount() {
+          const visibleItems = document.querySelectorAll('.trip-item:not([style*="display: none"])');
+          tripCount.textContent = visibleItems.length + ' trips';
+      }
+      
+      // Route dropdown change event
+      routeSelect.addEventListener('change', function() {
+          filterTrips();
+      });
+      
+      // Search functionality with debounce
+      let searchTimeout;
+      searchInput.addEventListener('input', function() {
+          clearTimeout(searchTimeout);
+          
+          searchTimeout = setTimeout(() => {
+              filterTrips();
+          }, 300);
+      });
+      
+      function filterTrips() {
+          const routeFilter = routeSelect.value;
+          const searchText = searchInput.value.toLowerCase().trim();
+          
+          tripItems.forEach(item => {
+              const routeValue = item.getAttribute('data-route');
+              const tripNo = item.getAttribute('data-trip-no');
+              
+              // Check if route matches (or if all routes selected)
+              const routeMatch = (routeFilter === 'all' || routeValue === routeFilter);
+              
+              // Check if search text matches any content in the card
+              const itemText = item.textContent.toLowerCase();
+              const searchMatch = searchText === '' || itemText.includes(searchText);
+              
+              // Show or hide based on combined filters
+              if (routeMatch && searchMatch) {
+                  item.style.display = '';
+              } else {
+                  item.style.display = 'none';
+              }
+          });
+          
+          updateVisibleCount();
+      }
+      
+      // Tab handling
+      document.querySelectorAll('#tripTabs .nav-link').forEach(tab => {
+          tab.addEventListener('click', function() {
+              document.querySelectorAll('#tripTabs .nav-link').forEach(t => {
+                  t.classList.remove('active');
+              });
+              document.querySelectorAll('.tab-pane').forEach(p => {
+                  p.classList.remove('show', 'active');
+              });
+              
+              this.classList.add('active');
+              const targetId = this.getAttribute('data-bs-target');
+              const targetPane = document.querySelector(targetId);
+              if (targetPane) {
+                  targetPane.classList.add('show', 'active');
+              }
+          });
+      });
+      
+      // Trip Revenue Chart variable
+      let tripRevenueChart = null;
+      
+      // Analyze Trip Revenue button handler
+      document.getElementById('analyzeTripBtn').addEventListener('click', function() {
+          // Get date range
+          const dateRange = document.getElementById('analysisDateRange').value;
+          if (!dateRange) {
+              alert('Please select a date range');
+              return;
+          }
+          
+          // Get selected trip
+          const tripSelect = document.getElementById('analyzeTripSelect');
+          const selectedTrip = tripSelect.value;
+          if (!selectedTrip) {
+              alert('Please select a trip to analyze');
+              return;
+          }
+          
+          // Show loading state
+          this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Analyzing...';
+          this.disabled = true;
+          
+          // Clear previous chart and messages
+          if (tripRevenueChart) {
+              tripRevenueChart.destroy();
+              tripRevenueChart = null;
+          }
+          document.getElementById('tripChartPlaceholder').style.display = 'none';
+          document.getElementById('tripNoDataMessage').style.display = 'none';
+          document.getElementById('tripChartContainer').style.display = 'none';
+          
+          // Fetch trip revenue data
+          fetchTripRevenueData('{{ schedule_no }}', selectedTrip, dateRange)
+              .then(data => {
+                  // Reset button
+                  this.innerHTML = '<i class="bi bi-graph-up"></i> Analyze';
+                  this.disabled = false;
+                  
+                  // Process and display data
+                  displayTripRevenueChart(data);
+              })
+              .catch(error => {
+                  // Reset button
+                  this.innerHTML = '<i class="bi bi-graph-up"></i> Analyze';
+                  this.disabled = false;
+                  
+                  // Show error
+                  console.error('Error fetching trip revenue data:', error);
+                  document.getElementById('tripNoDataMessage').style.display = 'block';
+                  document.getElementById('tripChartContainer').style.display = 'none';
+              });
+      });
+      
+      // Function to fetch trip revenue data
+      function fetchTripRevenueData(scheduleNo, tripNo, dateRange) {
+          // Parse the date range
+          const dates = dateRange.split(' to ');
+          const startDate = dates[0];
+          const endDate = dates.length > 1 ? dates[1] : dates[0];
+          
+          // Build the API URL - updated to use correct endpoint
+          const apiUrl = `/route/trip-revenue-analysis/?schedule_no=${encodeURIComponent(scheduleNo)}&trip_no=${encodeURIComponent(tripNo)}&start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`;
+          
+          // Make the API call
+          return fetch(apiUrl)
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  return response.json();
+              })
+              .then(responseData => {
+                  return responseData.data || [];
+              });
+      }
+      
+      // Generate array of dates from date range string
+      function generateDateRange(dateRangeStr) {
+          const dates = dateRangeStr.split(' to ');
+          const startDate = new Date(dates[0]);
+          const endDate = dates.length > 1 ? new Date(dates[1]) : new Date(dates[0]);
+          
+          const dateArray = [];
+          let currentDate = new Date(startDate);
+          
+          while (currentDate <= endDate) {
+              dateArray.push(formatDate(new Date(currentDate)));
+              currentDate.setDate(currentDate.getDate() + 1);
+          }
+          
+          return dateArray;
+      }
+      
+      // Format date as YYYY-MM-DD
+      function formatDate(date) {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+      }
+      
+      // Display the trip revenue chart with improved handling
+      function displayTripRevenueChart(data) {
+          // Get references to DOM elements
+          const chartContainer = document.getElementById('tripChartContainer');
+          const noDataMessage = document.getElementById('tripNoDataMessage');
+          
+          // Always destroy previous chart and remove canvas
+          if (tripRevenueChart) {
+              tripRevenueChart.destroy();
+              tripRevenueChart = null;
+          }
+          
+          // Remove and recreate the canvas element to ensure a complete reset
+          const oldCanvas = document.getElementById('tripRevenueChart');
+          if (oldCanvas) {
+              oldCanvas.remove();
+          }
+          const newCanvas = document.createElement('canvas');
+          newCanvas.id = 'tripRevenueChart';
+          chartContainer.appendChild(newCanvas);
+          
+          // Check if data exists
+          if (!data || data.length === 0 || !data[0] || !data[0].dates || data[0].dates.length === 0) {
+              // Hide chart container and show no data message
+              chartContainer.style.display = 'none';
+              noDataMessage.style.display = 'block';
+              return;
+          }
+          
+          // Show chart container and hide no data message
+          chartContainer.style.display = 'block';
+          noDataMessage.style.display = 'none';
+          
+          const ctx = newCanvas.getContext('2d');
+          
+          // Prepare datasets
+          const datasets = data.map((tripData, index) => {
+              // Generate a color based on index for visual distinction
+              const hue = (index * 137) % 360; // Golden angle for color distribution
+              const color = `hsl(${hue}, 70%, 50%)`;
+              
+              return {
+                  label: `Trip ${tripData.trip}`,
+                  data: tripData.revenues,
+                  borderColor: color,
+                  backgroundColor: `hsla(${hue}, 70%, 90%, 0.5)`,
+                  borderWidth: 2,
+                  tension: 0.3,
+                  pointRadius: 3,
+                  pointHoverRadius: 5,
+                  fill: false,
+                  spanGaps: true // Allow gaps in the line for dates with no data
+              };
+          });
+          
+          // Create the chart
+          tripRevenueChart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                  labels: data[0].dates,
+                  datasets: datasets
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                      title: {
+                          display: true,
+                          text: 'Daily Trip Revenue Analysis',
+                          font: {
+                              size: 16,
+                              weight: 'bold',
+                              family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                          },
+                          padding: {
+                              top: 10,
+                              bottom: 20
+                          },
+                          color: '#333'
+                      },
+                      legend: {
+                          position: 'top',
+                          labels: {
+                              boxWidth: 15,
+                              usePointStyle: true,
+                              padding: 20,
+                              font: {
+                                  family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                              }
+                          }
+                      },
+                      tooltip: {
+                          mode: 'index',
+                          intersect: false,
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          titleColor: '#333',
+                          bodyColor: '#333',
+                          borderColor: '#ddd',
+                          borderWidth: 1,
+                          cornerRadius: 8,
+                          padding: 12,
+                          boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                          titleFont: {
+                              family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                              weight: 'bold'
+                          },
+                          bodyFont: {
+                              family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                          },
+                          callbacks: {
+                              label: function(context) {
+                                  if (context.raw === 0 || context.raw === null || context.raw === undefined) {
+                                      return `${context.dataset.label}: No data`;
+                                  }
+                                  return `${context.dataset.label}: ₹${context.raw.toLocaleString()}`;
+                              }
+                          }
+                      }
+                  },
+                  scales: {
+                      x: {
+                          grid: {
+                              display: false
+                          },
+                          ticks: {
+                              maxRotation: 45,
+                              minRotation: 45,
+                              font: {
+                                  family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                              }
+                          }
+                      },
+                      y: {
+                          beginAtZero: true,
+                          grid: {
+                              borderDash: [2, 4]
+                          },
+                          ticks: {
+                              font: {
+                                  family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                              },
+                              callback: function(value) {
+                                  return '₹' + value.toLocaleString();
+                              }
+                          }
+                      }
+                  },
+                  interaction: {
+                      mode: 'nearest',
+                      axis: 'x',
+                      intersect: false
+                  },
+                  animations: {
+                      tension: {
+                          duration: 1000,
+                          easing: 'linear'
+                      }
+                  }
+              }
+          });
+      }
+    });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

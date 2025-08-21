@@ -1,0 +1,130 @@
+{% extends 'depot_manager/base.html' %}
+{% load static %}
+
+{% block title %}Depot Manager{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-center">KSRTC Depot Management System</h1>
+            <p class="text-center text-muted">Manage depots, employees, buses, and trip assignments</p>
+        </div>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Depots</h5>
+                    <h2 class="card-text">{{ depot_count }}</h2>
+                    <a href="{% url 'depot_list' %}" class="text-white">View All</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Employees</h5>
+                    <h2 class="card-text">{{ employee_count }}</h2>
+                    <a href="{% url 'employee_list' %}" class="text-white">View All</a>
+                </div>
+            </div>
+        </div>
+        <!-- Buses card removed -->
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5 class="card-title">Today's Assignments</h5>
+                    <h2 class="card-text">{{ today_assignments }}</h2>
+                    <a href="{% url 'daily_roster' %}" class="text-dark">View Roster</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <a href="{% url 'mark_attendance' %}" class="btn btn-primary btn-block">Mark Attendance</a>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <a href="{% url 'assign_trips' %}" class="btn btn-success btn-block">Assign Trips</a>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <a href="{% url 'daily_roster' %}" class="btn btn-info btn-block">View Daily Roster</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Chart -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Today's Attendance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="max-width: 400px; margin: 0 auto;">
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Attendance Chart
+    const attCtx = document.getElementById('attendanceChart').getContext('2d');
+    const attendanceChart = new Chart(attCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Present', 'Absent'],
+            datasets: [{
+                data: [{{ present_today }}, {{ employee_count|default:0 }} - {{ present_today }}],
+                backgroundColor: ['#28a745', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 15,
+                        padding: 10
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Today\'s Attendance',
+                    font: {
+                        size: 14
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    top: 10,
+                    bottom: 10
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Schedule Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary-color: #d9693a;
+            --primary-light: rgba(217, 105, 58, 0.1);
+            --primary-dark: #c55a2e;
+            --secondary-color: #4169E1;
+            --accent-color: #ff6334;
+            --light-bg: #f5f5f5;
+            --text-color: #333;
+            --text-secondary: #4A5568;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --hover-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            padding-top: 40px;
+            padding-bottom: 40px;
+            color: var(--text-color);
+        }
+        
+        .container {
+            max-width: 800px;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(217, 105, 58, 0.05) 0%, rgba(217, 105, 58, 0) 100%);
+            border-radius: 0 0 0 150px;
+            z-index: 0;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 2.2rem;
+            position: relative;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            width: 80px;
+            height: 4px;
+            background-color: var(--accent-color);
+            transform: translateX(-50%);
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        .back-link:hover {
+            color: var(--primary-dark);
+            transform: translateX(-3px);
+        }
+        
+        .form-section {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #eee;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+        
+        .form-label i {
+            margin-right: 8px;
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+        
+        .form-control {
+            padding: 12px 16px;
+            border-radius: 6px;
+            border: 1px solid #E2E8F0;
+            transition: var(--transition);
+            height: auto;
+            font-size: 1rem;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(217, 105, 58, 0.25);
+        }
+        
+        .btn-submit {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 14px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(217, 105, 58, 0.3);
+        }
+        
+        .btn-submit:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(217, 105, 58, 0.4);
+        }
+        
+        .alert {
+            margin-top: 20px;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .alert i {
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+        
+        .alert-success {
+            background-color: #d1fae5;
+            border-color: #a7f3d0;
+            color: #064e3b;
+        }
+        
+        .alert-danger {
+            background-color: #fee2e2;
+            border-color: #fecaca;
+            color: #7f1d1d;
+        }
+        
+        /* Form Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-section {
+            animation: fadeIn 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .form-section:nth-child(2) { animation-delay: 0.1s; }
+        .form-section:nth-child(3) { animation-delay: 0.2s; }
+        .form-section:nth-child(4) { animation-delay: 0.3s; }
+        
+        @media (max-width: 767px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'main_dashboard' %}" class="back-link">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+        
+        <h1>Submit Schedule Data</h1>
+        
+        {% if success_message %}
+        <div class="alert alert-success" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <div>{{ success_message }}</div>
+        </div>
+        {% endif %}
+        
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <div>{{ error_message }}</div>
+        </div>
+        {% endif %}
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="bi bi-info-circle-fill"></i> Basic Information
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="route_no" class="form-label">
+                                <i class="bi bi-signpost-2"></i> Route Number:
+                            </label>
+                            <input type="text" class="form-control" id="route_no" name="route_no" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="schedule_no" class="form-label">
+                                <i class="bi bi-calendar-check"></i> Schedule Number:
+                            </label>
+                            <input type="text" class="form-control" id="schedule_no" name="schedule_no" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="trip_no" class="form-label">
+                                <i class="bi bi-123"></i> Trip Number:
+                            </label>
+                            <input type="number" class="form-control" id="trip_no" name="trip_no" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="service_type" class="form-label">
+                                <i class="bi bi-tag"></i> Service Type:
+                            </label>
+                            <input type="text" class="form-control" id="service_type" name="service_type" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="date" class="form-label">
+                                <i class="bi bi-calendar-date"></i> Date:
+                            </label>
+                            <input type="date" class="form-control" id="date" name="date" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="bi bi-geo-alt-fill"></i> Route Details
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="source" class="form-label">
+                                <i class="bi bi-geo"></i> Source:
+                            </label>
+                            <input type="text" class="form-control" id="source" name="source" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="destination" class="form-label">
+                                <i class="bi bi-geo-fill"></i> Destination:
+                            </label>
+                            <input type="text" class="form-control" id="destination" name="destination" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label for="via" class="form-label">
+                                <i class="bi bi-signpost-split"></i> Via (Optional):
+                            </label>
+                            <input type="text" class="form-control" id="via" name="via" placeholder="Major stops along the route">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="bi bi-clock-history"></i> Timing & Performance
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="start_time" class="form-label">
+                                <i class="bi bi-clock"></i> Start Time:
+                            </label>
+                            <input type="time" class="form-control" id="start_time" name="start_time" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="end_time" class="form-label">
+                                <i class="bi bi-clock-fill"></i> End Time:
+                            </label>
+                            <input type="time" class="form-control" id="end_time" name="end_time" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="revenue" class="form-label">
+                                <i class="bi bi-currency-rupee"></i> Revenue (Optional):
+                            </label>
+                            <input type="number" step="0.01" class="form-control" id="revenue" name="revenue" placeholder="Enter total revenue in ₹">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="distance_km" class="form-label">
+                                <i class="bi bi-pin-map"></i> Distance (km, Optional):
+                            </label>
+                            <input type="number" step="0.01" class="form-control" id="distance_km" name="distance_km" placeholder="Enter trip distance in kilometers">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <i class="bi bi-cloud-upload"></i> Submit Schedule Data
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

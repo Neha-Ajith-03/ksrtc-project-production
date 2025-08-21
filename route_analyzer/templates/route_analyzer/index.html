@@ -1,0 +1,168 @@
+{% extends 'route_analyzer/base.html' %}
+
+{% block title %}Route Analyzer - Search{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>Route Analyzer</h1>
+        <p class="text-muted">Search and analyze bus routes and schedules</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Search by Stop</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="stopSearch" class="form-label">Enter stop name:</label>
+                    <div class="input-group">
+                        <input type="text" id="stopSearch" class="form-control" placeholder="e.g., Thampanoor" list="stopsList">
+                        <button class="btn btn-primary" id="searchBtn">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    <datalist id="stopsList">
+                        {% for stop in stop_names %}
+                        <option value="{{ stop }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+                <div id="searchResults" class="mt-3">
+                    <!-- Search results will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Browse Routes</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="routeFilter" class="form-label">Filter routes:</label>
+                    <input type="text" id="routeFilter" class="form-control" placeholder="Enter route number">
+                </div>
+                <div class="list-group" id="routesList">
+                    {% for route_no in route_numbers %}
+                    <a href="{% url 'route_analyzer:route_detail' route_no=route_no %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Route {{ route_no }}</h5>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="list-group-item">No routes found</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Route Profitability Analysis</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p>Analyze which routes are most profitable and which are operating at a loss based on EPKM (Earnings Per Kilometer) data.</p>
+                        <ul>
+                            <li>Rank routes by profitability</li>
+                            <li>Identify top performing and underperforming routes</li>
+                            <li>Compare revenue and EPKM across routes</li>
+                            <li>Visualize profitability metrics with charts</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 text-center d-flex align-items-center justify-content-center">
+                        <a href="{% url 'route_analyzer:route_profitability' %}" class="btn btn-lg btn-primary">
+                            <i class="fas fa-chart-line"></i> Analyze Profitability
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchBtn = document.getElementById('searchBtn');
+        const stopSearch = document.getElementById('stopSearch');
+        const searchResults = document.getElementById('searchResults');
+        const routeFilter = document.getElementById('routeFilter');
+        const routesList = document.getElementById('routesList');
+
+        // Search for routes by stop name
+        searchBtn.addEventListener('click', function() {
+            const query = stopSearch.value.trim();
+            if (query.length < 2) {
+                searchResults.innerHTML = '<div class="alert alert-warning">Please enter at least 2 characters</div>';
+                return;
+            }
+
+            searchResults.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>';
+
+            fetch(`{% url 'route_analyzer:search_routes' %}?query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.routes.length === 0) {
+                        searchResults.innerHTML = '<div class="alert alert-info">No routes found for this stop</div>';
+                        return;
+                    }
+
+                    let html = '<div class="list-group">';
+                    data.routes.forEach(route => {
+                        html += `
+                            <a href="{% url 'route_analyzer:route_detail' route_no='ROUTE_NO' %}".replace('ROUTE_NO', route.route_no) class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Route ${route.route_no}</h5>
+                                    <small>${route.stops_count} stops</small>
+                                </div>
+                                <p class="mb-1">${route.source} to ${route.destination}</p>
+                            </a>
+                        `;
+                    });
+                    html += '</div>';
+
+                    searchResults.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    searchResults.innerHTML = '<div class="alert alert-danger">Error searching for routes</div>';
+                });
+        });
+
+        // Allow search on Enter key
+        stopSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchBtn.click();
+            }
+        });
+
+        // Filter routes list
+        routeFilter.addEventListener('input', function() {
+            const filter = this.value.toLowerCase();
+            const items = routesList.querySelectorAll('.list-group-item');
+
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(filter)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

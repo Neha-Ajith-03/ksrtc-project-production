@@ -1,0 +1,161 @@
+{% extends 'depot_manager/base.html' %}
+{% load static %}
+
+{% block title %}{{ bus.registration_number }} - Bus Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Bus Details</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'depot_manager_index' %}">Depot Manager</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'bus_list' %}">Buses</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ bus.registration_number }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Bus Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="bus-icon">
+                            <i class="fas fa-bus fa-5x text-info"></i>
+                        </div>
+                        <h3 class="mt-2">{{ bus.registration_number }}</h3>
+                        <span class="badge bg-primary">{{ bus.get_bus_type_display }}</span>
+                        <span class="badge {% if bus.status == 'active' %}bg-success{% elif bus.status == 'maintenance' %}bg-warning{% else %}bg-danger{% endif %}">
+                            {{ bus.get_status_display }}
+                        </span>
+                    </div>
+
+                    <table class="table">
+                        <tr>
+                            <th>Depot:</th>
+                            <td>{{ bus.depot.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Seating Capacity:</th>
+                            <td>{{ bus.seating_capacity }} passengers</td>
+                        </tr>
+                        <tr>
+                            <th>Manufacturing Year:</th>
+                            <td>{{ bus.manufacturing_year }}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Maintenance:</th>
+                            <td>{{ bus.last_maintenance_date|date:"F j, Y"|default:"Never" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Next Maintenance Due:</th>
+                            <td>{{ bus.next_maintenance_due|date:"F j, Y"|default:"Not scheduled" }}</td>
+                        </tr>
+                    </table>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-warning">
+                            <i class="fas fa-tools"></i> Schedule Maintenance
+                        </button>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-calendar-alt"></i> Assign to Schedule
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <!-- Maintenance Records -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Maintenance History</h5>
+                </div>
+                <div class="card-body">
+                    {% if maintenance_records %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Cost</th>
+                                    <th>Performed By</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in maintenance_records %}
+                                <tr>
+                                    <td>{{ record.scheduled_date|date:"M d, Y" }}</td>
+                                    <td>{{ record.get_maintenance_type_display }}</td>
+                                    <td>
+                                        {% if record.status == 'completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% elif record.status == 'in_progress' %}
+                                        <span class="badge bg-primary">In Progress</span>
+                                        {% elif record.status == 'scheduled' %}
+                                        <span class="badge bg-info">Scheduled</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ record.cost|default:"-" }}</td>
+                                    <td>{{ record.performed_by.name|default:"-" }}</td>
+                                    <td>{{ record.description|truncatechars:30 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center">No maintenance records found for this bus.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Upcoming Assignments -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Upcoming Assignments</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_assignments %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Schedule</th>
+                                    <th>Assigned By</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment in upcoming_assignments %}
+                                <tr>
+                                    <td>{{ assignment.assignment_date|date:"M d, Y" }}</td>
+                                    <td>{{ assignment.schedule.schedule_no }}</td>
+                                    <td>{{ assignment.assigned_by.name|default:"System" }}</td>
+                                    <td>{{ assignment.remarks|truncatechars:30|default:"-" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center">No upcoming assignments found for this bus.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Map: {{ schedule.schedule_no }} - Trip {{ schedule.trip_no }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary-color: #d9693a;
+            --primary-light: rgba(217, 105, 58, 0.1);
+            --primary-dark: #c55a2e;
+            --secondary-color: #4169E1;
+            --accent-color: #ff6334;
+            --light-bg: #f5f5f5;
+            --text-color: #333;
+            --text-secondary: #4A5568;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --hover-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            padding-top: 30px;
+            padding-bottom: 30px;
+            color: var(--text-color);
+        }
+        
+        .map-container {
+            height: 650px;
+            width: 100%;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .trip-header {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://source.unsplash.com/random/1600x900/?road,bus,transport');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 25px 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--card-shadow);
+            position: relative;
+        }
+        
+        .metrics-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            z-index: 2;
+            transform: translateY(-30px);
+        }
+        
+        .metrics-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .metrics-title i {
+            color: var(--primary-color);
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .metrics-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .metric {
+            display: flex;
+            align-items: center;
+            background-color: var(--light-bg);
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            transition: var(--transition);
+            flex: 1;
+            min-width: 160px;
+        }
+        
+        .metric:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .metric-icon {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            margin-right: 12px;
+            background-color: var(--primary-light);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .metric-data {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .metric-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-color);
+            line-height: 1.2;
+        }
+        
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            color: white;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--accent-color);
+        }
+        
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1rem;
+            margin-top: 15px;
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+        
+        .back-btn {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            border-radius: 30px;
+            transition: var(--transition);
+            border: 1px solid rgba(255,255,255,0.5);
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-btn i {
+            margin-right: 6px;
+        }
+        
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .header-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @media (max-width: 768px) {
+            .trip-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 20px;
+            }
+            
+            .back-btn {
+                margin-top: 15px;
+                align-self: flex-start;
+            }
+            
+            .metrics-card {
+                transform: translateY(-15px);
+                padding: 15px;
+            }
+            
+            .metrics-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .metric {
+                width: 100%;
+                min-width: unset;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+                margin-top: 10px;
+            }
+            
+            .map-container {
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="trip-header">
+            <div class="header-info">
+                <h1>Schedule {{ schedule.schedule_no }} - Trip {{ schedule.trip_no }}</h1>
+                <p class="subtitle"><i class="bi bi-pin-map-fill me-2"></i>{{ schedule.source }} to {{ schedule.destination }} | {{ route_no }}</p>
+            </div>
+            <a href="{% url 'trip_list_view' schedule.schedule_no %}" class="back-btn">
+                <i class="bi bi-arrow-left"></i> Back to Trips
+            </a>
+        </div>
+        
+        {% if trip %}
+        <div class="metrics-card">
+            <div class="metrics-title">
+                <i class="bi bi-info-circle-fill"></i> Trip Details
+            </div>
+            <div class="metrics-bar">
+                {% if trip.revenue %}
+                    <div class="metric">
+                        <i class="bi bi-currency-rupee metric-icon"></i>
+                        <div class="metric-data">
+                            <span class="metric-value">₹{{ trip.revenue|floatformat:2 }}</span>
+                            <span class="metric-label">Revenue</span>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if trip.distance_km %}
+                    <div class="metric">
+                        <i class="bi bi-geo-alt metric-icon"></i>
+                        <div class="metric-data">
+                            <span class="metric-value">{{ trip.distance_km|floatformat:1 }} km</span>
+                            <span class="metric-label">Distance</span>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if trip.epkm %}
+                    <div class="metric">
+                        <i class="bi bi-graph-up-arrow metric-icon"></i>
+                        <div class="metric-data">
+                            <span class="metric-value">₹{{ trip.epkm|floatformat:2 }}</span>
+                            <span class="metric-label">EPKM</span>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <div class="metric">
+                    <i class="bi bi-calendar-event metric-icon"></i>
+                    <div class="metric-data">
+                        <span class="metric-value">{{ trip.date }}</span>
+                        <span class="metric-label">Date</span>
+                    </div>
+                </div>
+                
+                <div class="metric">
+                    <i class="bi bi-truck metric-icon"></i>
+                    <div class="metric-data">
+                        <span class="metric-value">{{ schedule.service_type }}</span>
+                        <span class="metric-label">Service Type</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="map-container">
+            {{ map_html|safe }}
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

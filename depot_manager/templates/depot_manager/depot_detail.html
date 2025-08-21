@@ -1,0 +1,130 @@
+{% extends 'depot_manager/base.html' %}
+{% load static %}
+
+{% block title %}{{ depot.name }} - Depot Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Depot Details</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'depot_manager_index' %}">Depot Manager</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'depot_list' %}">Depots</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ depot.name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Depot Information</h5>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-center mb-3">{{ depot.name }}</h3>
+                    <p class="text-center text-muted">{{ depot.location }}</p>
+
+                    <table class="table">
+                        <tr>
+                            <th>Depot ID:</th>
+                            <td>{{ depot.depot_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Address:</th>
+                            <td>{{ depot.address }}</td>
+                        </tr>
+                        <tr>
+                            <th>Contact:</th>
+                            <td>{{ depot.contact_number|default:"Not provided" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ depot.email|default:"Not provided" }}</td>
+                        </tr>
+                        <!-- Bus capacity removed -->
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-12 mb-3">
+                            <h5>Employees</h5>
+                            <h2>{{ employee_stats.count }}</h2>
+                        </div>
+                        <div class="col-6">
+                            <h5>Drivers</h5>
+                            <h2>{{ employee_stats.drivers.count }}</h2>
+                        </div>
+                        <div class="col-6">
+                            <h5>Conductors</h5>
+                            <h2>{{ employee_stats.conductors.count }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <!-- Employees Tab -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Employees</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employee in employees %}
+                                <tr>
+                                    <td>{{ employee.emp_id }}</td>
+                                    <td>{{ employee.name }}</td>
+                                    <td>{{ employee.get_role_display }}</td>
+                                    <td>
+                                        {% if employee.status == 'active' %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% elif employee.status == 'on_leave' %}
+                                        <span class="badge bg-warning">On Leave</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ employee.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'employee_detail' employee.emp_id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No employees found for this depot.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buses section removed -->
+        </div>
+    </div>
+</div>
+{% endblock %}
